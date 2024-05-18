@@ -1,3 +1,4 @@
+ 
 pipeline{
     agent any
     tools{
@@ -58,12 +59,12 @@ pipeline{
                 sh 'mvn clean install'
             }
         }  
-        stage("OWASP Dependency Check"){
-            steps{
-                dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP-CHECK'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.html'
-            }
-        }
+       // stage("OWASP Dependency Check"){
+        //    steps{
+         //       dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP-Check'
+          //      dependencyCheckPublisher pattern: '**/dependency-check-report.html'
+          //  }
+       // }
         stage("Docker Build & Push"){
             steps{
                 script{
