@@ -37,13 +37,22 @@ pipeline{
                 }
             }
         }
-        stage("quality gate"){
-           steps {
-                 script {
-                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token' 
+         
+        stage("quality gate") {
+            steps {
+                script {
+                    def qg = waitForQualityGate(abortPipeline: false, credentialsId: 'Sonar-token')
+                    if (qg.status != 'OK') {
+                        error "Pipeline aborted due to quality gate failure: ${qg.status}"
+
+                    } else {
+                         echo "Quality gate passed: ${qg.status}"
+
                     }
-                } 
-        } 
+                }
+            }
+        }
+          
         stage('mvn build'){
             steps{
                 sh 'mvn clean install'
