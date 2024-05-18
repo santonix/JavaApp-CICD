@@ -15,7 +15,7 @@ pipeline{
         }
         stage('Checkout From Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/uniquesreedhar/JavaApp-CICD.git'
+                git branch: 'main', url: 'git@github.com:santonix/JavaApp-CICD.git'
             }
         }
         stage('mvn compile'){
@@ -30,7 +30,7 @@ pipeline{
         }
         stage("Sonarqube Analysis "){
             steps{
-                withSonarQubeEnv('sonar-server') {
+                withSonarQubeEnv('sonarqube server') {
                     sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Pet-Clinic \
                     -Dsonar.java.binaries=. \
                     -Dsonar.projectKey=Petclinic '''
@@ -58,17 +58,17 @@ pipeline{
         stage("Docker Build & Push"){
             steps{
                 script{
-                   withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
+                   withDockerRegistry(credentialsId: 'dockerhub-credentials', toolName: 'docker'){   
                        sh "docker build -t petclinic1 ."
-                       sh "docker tag petclinic1 sreedhar8897/petclinic:latest "
-                       sh "docker push sreedhar8897/petclinic:latest "
+                       sh "docker tag petclinic1 santonix/santonix-petclinic:latest "
+                       sh "docker push santonix/santonix-petclinic:latest "
                     }
                 }
             }
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image sreedhar8897/petclinic:latest > trivy.txt" 
+                sh "trivy image santonix/santonix-petclinic:latest > trivy.txt" 
             }
         }
         stage('Clean up containers') {   //if container runs it will stop and remove this block
@@ -94,7 +94,7 @@ pipeline{
               URL de build: ${env.BUILD_URL}
               """
              mail(
-             to: 'madithati123@gmail.com',
+             to: 'jofranco1203@gmail.com',
              subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", 
              body: approvalMailContent,
              mimeType: 'text/plain'
@@ -111,12 +111,12 @@ pipeline{
     }
         stage('Deploy to conatiner'){
             steps{
-                sh 'docker run -d --name pet1 -p 8082:8080 sreedhar8897/petclinic:latest'
+                sh 'docker run -d --name pet1 -p 8082:8080 santonix/santonix-petclinic:latest'
             }
         }
         stage("Deploy To Tomcat"){
             steps{
-                sh "sudo cp  /var/lib/jenkins/workspace/Pet-Clinic/target/petclinic.war /opt/apache-tomcat-9.0.65/webapps/ "
+                sh "sudo cp  /var/lib/jenkins/workspace/Pet-Clinic/target/petclinic.war /opt/tomcat/webapps/ "
             }
             post {
      always {
@@ -125,7 +125,7 @@ pipeline{
             body: "Project: ${env.JOB_NAME}<br/>" +
                 "Build Number: ${env.BUILD_NUMBER}<br/>" +
                 "URL: ${env.BUILD_URL}<br/>",
-            to: 'madithati123@gmail.com',
+            to: 'jofranco1203@gmail.com',
             attachmentsPattern: 'trivy.txt'
         }
     }
