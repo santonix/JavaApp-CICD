@@ -7,6 +7,8 @@ pipeline{
     }
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
+        DOCKER_REGISTRY_URL = 'https://index.docker.io/v1/'
+        DOCKERHUB_CREDENTIALS = 'jenkins-vivo-dockerhub'
     }
     stages {
         stage('clean workspace'){
@@ -16,7 +18,7 @@ pipeline{
         }
         stage('Checkout From Git'){
             steps{
-                git branch: 'main', url: 'git@github.com:santonix/JavaApp-CICD.git'
+                git branch: 'main',credentialsId: 'jenkins-github-private', url: 'git@github.com:santonix/JavaApp-CICD.git'
             }
         }
         stage('mvn compile'){
@@ -31,7 +33,7 @@ pipeline{
         }
         stage("Sonarqube Analysis "){
             steps{
-                withSonarQubeEnv('sonarqube server') {
+                withSonarQubeEnv('sonar server') {
                     sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Pet-Clinic \
                     -Dsonar.java.binaries=. \
                     -Dsonar.projectKey=Petclinic '''
@@ -68,7 +70,7 @@ pipeline{
         stage("Docker Build & Push"){
             steps{
                 script{
-                   withDockerRegistry(credentialsId: 'dockerhub-credentials', toolName: 'docker'){   
+                   withDockerRegistry(credentialsId: 'jenkins-vivo-dockerhub', toolName: 'docker'){   
                        sh "docker build -t petclinic1 ."
                        sh "docker tag petclinic1 santonix/santonix-petclinic:latest "
                        sh "docker push santonix/santonix-petclinic:latest "
