@@ -6,7 +6,7 @@ pipeline{
         maven 'maven3'
     }
     environment {
-        SCANNER_HOME=tool 'sonar-scanner'
+        SCANNER_HOME=tool 'sonar scanner'
         DOCKER_REGISTRY_URL = 'https://index.docker.io/v1/'
         DOCKERHUB_CREDENTIALS = 'jenkins-vivo-dockerhub'
     }
